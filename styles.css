@@ -1,180 +1,183 @@
-@font-face {
-    font-family: 'HakgyoansimChulseokbuTTF-B';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimChulseokbuTTF-B.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="https://sgisapi.kostat.go.kr/OpenAPI3/auth/javascriptAuth?consumer_key=5b44d920dbab4a6daaef"></script>
+    <title>상 못 받으면 죽는 병 걸림</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAR7XCV3jEEfdVzi97kSHSb6wg10R--_w"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="arrow-button" id="prev-button"> &lt; </div>
+        <div class="left">
+            <div class="top">
+                <h1 id="time-message">전쟁 관련 이슈</h1>
+                <div class="rounded-box"></div>
+                <div class="rounded-box"></div>
+                <div class="rounded-box"></div>
+            </div>
+            <div class="bottom">
+                <div id="output"></div> <!-- 기사 요약을 표시할 요소 추가 -->
+                <button id="prevButton" disabled>이전</button>
+                <button id="nextButton" disabled>다음</button>
+            </div>
+        </div>
+        <div class="arrow-button" id="next-button"> &gt; </div>
 
-@font-face {
-    font-family: 'goorm-sans-bold';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/goorm-sans-bold.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-}
+        <div class="right">
+            <input id="location" type="text" placeholder="장소를 입력하세요">
+            <button onclick="geocodeLocation()">검색</button>
+            <div id="map"></div>
+            
+        </div>
+    </div>
 
-@font-face {
-    font-family: 'CookieRun-Regular';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
+    <script> //박스
+        const boxes = [
+            ['우크라이나 · 러시아', '시리아 내전', '아프가니스탄'],
+            ['소말리아', '시리아·터키', '인도·파키스탄'],
+            ['이라크', '대한민국', '이란'],
+            ['이스라엘·팔레스타인', '미얀마', '필리핀']
+        ];
 
-* {
-    box-sizing: border-box;
-}
+        let currentIndex2 = 0;
 
-body {
-    font-family: 'Montserrat', sans-serif; /* Montserrat 글꼴 사용 */
-    background-color: #f5f5f5; /* 부드러운 회색 배경 */
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        function updateBoxes() {
+            const roundedBoxes = document.querySelectorAll('.rounded-box');
+            const newBoxes = boxes[currentIndex2];
+            roundedBoxes.forEach((box, index) => {
+                box.textContent = newBoxes[index];
+            });
+        }
 
-.container {
-    display: flex;
-    min-height: 100vh;
-    padding: 20px;
-    justify-content: space-between;
-}
+        document.getElementById('next-button').addEventListener('click', () => {
+            if (currentIndex2 < boxes.length - 1) {
+                currentIndex2++;
+                updateBoxes();
+            }
+        });
 
-.left {
-    display: flex;
-    flex-direction: column;
-    width: 40%; /* 왼쪽 칸을 40%로 설정 */
-    background-color: #e0f7fa; /* 왼쪽 칸의 배경색 */
-}
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentIndex2 > 0) {
+                currentIndex2--;
+                updateBoxes();
+            }
+        });
 
-.top {
-    display: flex;
-    flex-direction: column; /* 아래로 세로 배치 */
-    justify-content: space-around; /* 공간을 균등하게 배치 */
-    flex: 0.5; /* 위쪽 칸의 높이를 조정 */
-    background-color: #000B58; /* 위쪽 칸의 배경색 */
-}
+        // 초기화
+        updateBoxes();
+    </script>
 
-.arrow-buttons {
-    display: flex;
-    justify-content: space-between; /* 버튼을 양쪽으로 배치 */
-    align-items: center;
-    margin: 10px 0;
-}
+    <script> //지도
+        let map;
+        let marker; 
+        let infoWindow; 
 
-.arrow-button {
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    background-color: lightgray;
-    cursor: pointer;
-    margin: 10px;
-}
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 8,
+            });
+            infoWindow = new google.maps.InfoWindow(); 
+        }
 
-.bottom {
-    flex: 1; /* 아래쪽 칸의 높이를 조정 */
-    background-color: #003161; /* 아래쪽 칸의 배경색 */
-    color: white; /* 글씨 색상 하얀색 */
-    padding: 20px; /* 여백 추가 */
-    font-family: 'Arial', sans-serif; /* 글꼴 설정 */
-    text-align: center; /* 텍스트 가운데 정렬 */
-    font-size: 15px; /* 글꼴 크기 설정 */
-}
+        function geocodeLocation() {
+            const geocoder = new google.maps.Geocoder();
+            const address = document.getElementById("location").value;
 
-.rounded-box {
-    width: 220px;
-    height: 40px;
-    background-color: #006A67; /* 둥근 네모칸의 색상 */
-    border-radius: 15px; /* 둥글게 만들기 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 15px;
-    margin: 10px auto; /* 중앙 정렬 */
-    font-family: CookieRun-Regular, sans-serif;
-}
+            geocoder.geocode({ address: address }, (results, status) => {
+                if (status === "OK") {
+                    map.setCenter(results[0].geometry.location);
+                    
+                    if (marker) {
+                        marker.setMap(null);
+                    }
+                    
+                    marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                    });
 
-.rounded-box2 {
-    width: 220px;
-    height: 100px;
-    background-color: #006A67; /* 둥근 네모칸의 색상 */
-    border-radius: 15px; /* 둥글게 만들기 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 15px;
-    margin: 10px auto; /* 중앙 정렬 */
-    font-family: CookieRun-Regular, sans-serif;
-}
+                    loadData(address); // 장소 검색 후 자동으로 요약 로드
 
-.right {
-    width: 60%; /* 오른쪽 칸을 60%로 설정 */
-    background-color: #FFF4B7; /* 오른쪽 칸의 배경색 */
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
+                } else {
+                    alert("장소를 찾을 수 없습니다: " + status);
+                }
+            });
+        }
 
-#location {
-    width: 80%;
-    padding: 12px;
-    font-size: 18px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: -0.5px;
-    box-sizing: border-box;
-}
+        let currentIndex = 0; //뉴스 요약
+        let summaries = []; 
 
-#time-message{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* 수직 중앙 정렬 */
-    font-family: CookieRun-Regular, sans-serif;
-    font-size: 30px;
-    color: white;
-    
-}
+        function loadData(location) {
+            const url = `https:/api-v2.deepsearch.com/v1/articles/politics,tech?keyword=title:(${location} and (군사 or 난민 or 전선 or 폭격 or 사상자))&date_from=2024-10-22-25&date_to=2024-11-22&api_key=32b1e1335fcb41599f2a0df4c4170bea`; 
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('네트워크 응답이 좋지 않습니다.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    summaries = data.data.map(article => article.summary); 
+                    currentIndex = 0; 
+                    displaySummary(); 
+                    updateButtonState(); 
+                })
+                .catch(error => {
+                    console.error('문제가 발생했습니다:', error);
+                    document.getElementById('output').innerText = '데이터 로드 중 오류 발생';
+                });
+        }
 
-button {
-    padding: 12px 20px;
-    font-size: 18px;
-    background-color: #007BFF; /* 파란색 배경 */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-weight: 700; /* 버튼 텍스트 두껍게 */
-    letter-spacing: 0.5px;
-}
+        function displaySummary() {
+            const output = document.getElementById('output');
 
-button:hover {
-    background-color: #0056b3; /* 버튼 호버 효과 */
-}
+            // 요약을 출력 영역에 표시
+            if (currentIndex < summaries.length) {
+                const summary = summaries[currentIndex];
+                output.innerText = summary; // 기사 요약을 출력 영역에 표시
+            } else {
+                output.innerText = '더 이상 기사가 없습니다.'; 
+            }
 
-#map {
-    width: 100%;
-    height: 400px;
-    border-radius: 8px;
-    margin-top: 20px;
-}
+            updateButtonState(); 
+        }
 
+        function displayPreviousSummary() {
+            if (currentIndex > 0) {
+                currentIndex--; 
+                displaySummary(); 
+            }
+        }
 
-input[type="text"] {
-    padding: 10px;
-    border: 2px solid #003160;
-    border-radius: 5px;
-    width: 300px;
-    font-size: 16px;
-    margin-bottom: 10px;
-    transition: border-color 0.3s;
-}
+        function displayNextSummary() {
+            if (currentIndex < summaries.length - 1) {
+                currentIndex++; 
+                displaySummary(); 
+            }
+        }
 
-input[type="text"]:focus {
-    border-color: #66bb6a;
-    outline: none;
-}
+        function updateButtonState() {
+            const nextButton = document.getElementById('nextButton');
+            const prevButton = document.getElementById('prevButton');
+            nextButton.disabled = currentIndex >= summaries.length - 1; 
+            prevButton.disabled = currentIndex === 0; 
+        }
+
+        window.onload = function() {
+            initMap(); // 지도 초기화
+            document.getElementById('prevButton').onclick = displayPreviousSummary; // 이전 버튼 클릭 시 요약 출력
+            document.getElementById('nextButton').onclick = displayNextSummary; // 다음 버튼 클릭 시 요약 출력
+        };
+    </script>
+</body>
+</html>
