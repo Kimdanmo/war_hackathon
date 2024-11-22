@@ -16,6 +16,7 @@
 </head>
 <body>
     <div class="container">
+        <div class="arrow-button" id="prev-button"> &lt; </div>
         <div class="left">
             <div class="top">
                 <h1 id="time-message">전쟁 관련 이슈</h1>
@@ -29,6 +30,8 @@
                 <button id="nextButton" disabled>다음</button>
             </div>
         </div>
+        <div class="arrow-button" id="next-button"> &gt; </div>
+
         <div class="right">
             <input id="location" type="text" placeholder="장소를 입력하세요">
             <button onclick="geocodeLocation()">검색</button>
@@ -37,7 +40,43 @@
         </div>
     </div>
 
-    <script>
+    <script> //박스
+        const boxes = [
+            ['우크라이나 · 러시아', '시리아 내전', '아프가니스탄'],
+            ['소말리아', '시리아·터키', '인도·파키스탄'],
+            ['이라크', '대한민국', '이란'],
+            ['이스라엘·팔레스타인', '미얀마', '필리핀']
+        ];
+
+        let currentIndex2 = 0;
+
+        function updateBoxes() {
+            const roundedBoxes = document.querySelectorAll('.rounded-box');
+            const newBoxes = boxes[currentIndex2];
+            roundedBoxes.forEach((box, index) => {
+                box.textContent = newBoxes[index];
+            });
+        }
+
+        document.getElementById('next-button').addEventListener('click', () => {
+            if (currentIndex2 < boxes.length - 1) {
+                currentIndex2++;
+                updateBoxes();
+            }
+        });
+
+        document.getElementById('prev-button').addEventListener('click', () => {
+            if (currentIndex2 > 0) {
+                currentIndex2--;
+                updateBoxes();
+            }
+        });
+
+        // 초기화
+        updateBoxes();
+    </script>
+
+    <script> //지도
         let map;
         let marker; 
         let infoWindow; 
@@ -75,11 +114,11 @@
             });
         }
 
-        let currentIndex = 0; 
+        let currentIndex = 0; //뉴스 요약
         let summaries = []; 
 
         function loadData(location) {
-            const url = `https:/api-v2.deepsearch.com/v1/articles/politics,tech?keyword=title:(${location} and (전쟁 or 전투 or 위험))&api_key=32b1e1335fcb41599f2a0df4c4170bea`; 
+            const url = `https:/api-v2.deepsearch.com/v1/articles/politics,tech?keyword=title:(${location} and (군사 or 난민 or 전선 or 폭격 or 사상자))&date_from=2024-10-22-25&date_to=2024-11-22&api_key=32b1e1335fcb41599f2a0df4c4170bea`; 
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
