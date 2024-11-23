@@ -36,7 +36,6 @@
             <input id="location" type="text" placeholder="장소를 입력하세요">
             <button onclick="geocodeLocation()">검색</button>
             <div id="map"></div>
-            
         </div>
     </div>
 
@@ -48,6 +47,13 @@
             ['이스라엘·팔레스타인', '미얀마', '필리핀']
         ];
 
+        const list2 = [
+            ['우크라이나 and 러시아', '시리아 and 내전', '아프가니스탄'],  // 우크라이나
+            ['소말리아 or 알샤바브', '시리아 and 터키', '인도 and 파키스탄 or 카슈미르'],        // 시리아
+            ['이라크', '(북한 or 김정은) and(not 우크라이나) and(남한 or 윤석열)', '이란'],
+            ['이스라엘 and 팔레스타인', '미얀마 and 내전', '필리핀 or 무슬림'] // 아프가니스탄
+        ];
+
         let currentIndex2 = 0;
 
         function updateBoxes() {
@@ -55,6 +61,7 @@
             const newBoxes = boxes[currentIndex2];
             roundedBoxes.forEach((box, index) => {
                 box.textContent = newBoxes[index];
+                box.setAttribute('data-index', index); // data-index 추가
             });
         }
 
@@ -74,6 +81,15 @@
 
         // 초기화
         updateBoxes();
+
+        document.querySelectorAll('.rounded-box').forEach(box => {
+            box.addEventListener('click', function() {
+                const index = this.getAttribute('data-index');
+                const location = list2[currentIndex2][index]; // list2의 값 가져오기
+                loadData(location); // 지역 이름으로 데이터 로드
+                geocodeLocation2();
+            });
+        });
     </script>
 
     <script> //지도
@@ -106,8 +122,13 @@
                         position: results[0].geometry.location,
                     });
 
-                    loadData(address); // 장소 검색 후 자동으로 요약 로드
+                    // 말풍선에 나라 이름 표시
+                    const countryName = results[0].formatted_address; // 검색된 나라 이름
+                    infoWindow.setContent(countryName); // 말풍선 내용 설정
+                    infoWindow.open(map, marker); // 말풍선 열기
 
+                    loadData(address); // 장소 검색 후 자동으로 요약 로드
+                    
                 } else {
                     alert("장소를 찾을 수 없습니다: " + status);
                 }
