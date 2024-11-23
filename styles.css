@@ -62,6 +62,14 @@ body {
     cursor: pointer;
     margin: 10px;
     margin-top: 150px; /* 버튼을 아래로 이동 */
+    font-size: 25px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    text-align: center; /* 텍스트 수평 중앙 정렬 */
+}
+
+.arrow-button:hover {
+    transform: scale(1.1); /* 버튼 크기 증가 */
 }
 
 .bottom {
@@ -86,6 +94,12 @@ body {
     font-size: 15px;
     margin: 10px auto; /* 중앙 정렬 */
     font-family: CookieRun-Regular, sans-serif;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.rounded-box:hover {
+    transform: scale(1.1); /* 버튼 크기 증가 */
 }
 
 .rounded-box2 {
